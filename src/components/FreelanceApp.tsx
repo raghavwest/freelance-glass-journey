@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import ClientForm from './ClientForm';
 import JobDetails from './JobDetails';
 import EmptyState from './EmptyState';
 import { calculatePriorityScore } from '@/lib/utils';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 export type Tag = string;
 

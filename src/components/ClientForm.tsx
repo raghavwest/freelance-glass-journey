@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { FormData, Job } from './FreelanceApp';
 import { X, Plus, Calendar, Mail, Globe, Briefcase, DollarSign, Tag } from 'lucide-react';
@@ -27,15 +26,14 @@ const ClientForm: React.FC<ClientFormProps> = ({
     if (newTag.trim() !== '') {
       const updatedTags = [...formData.tags, newTag.trim()];
       
-      // Update form data with new tags
-      const syntheticEvent = {
+      // Create a proper synthetic event that TypeScript will accept
+      onChange({
         target: {
           name: 'tags',
           value: updatedTags
         }
-      } as React.ChangeEvent<HTMLInputElement>;
+      } as unknown as React.ChangeEvent<HTMLInputElement>);
       
-      onChange(syntheticEvent);
       setNewTag('');
     }
   };
@@ -43,15 +41,13 @@ const ClientForm: React.FC<ClientFormProps> = ({
   const removeTag = (tagToRemove: string) => {
     const updatedTags = formData.tags.filter(tag => tag !== tagToRemove);
     
-    // Update form data with filtered tags
-    const syntheticEvent = {
+    // Create a proper synthetic event that TypeScript will accept
+    onChange({
       target: {
         name: 'tags',
         value: updatedTags
       }
-    } as React.ChangeEvent<HTMLInputElement>;
-    
-    onChange(syntheticEvent);
+    } as unknown as React.ChangeEvent<HTMLInputElement>);
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
