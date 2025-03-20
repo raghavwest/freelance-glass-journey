@@ -5,6 +5,9 @@ import JobDetails from './JobDetails';
 import EmptyState from './EmptyState';
 import { calculatePriorityScore } from '@/lib/utils';
 import { toast } from "sonner";
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export type Tag = string;
 
@@ -71,6 +74,9 @@ const FreelanceApp: React.FC = () => {
   });
   const [todoList, setTodoList] = useState<Todo[]>([]);
   const [currentTime, setCurrentTime] = useState<Record<number, string>>({});
+  const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
+  const [completedJobId, setCompletedJobId] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   // Sort jobs by priority score
   useEffect(() => {
@@ -258,16 +264,30 @@ const FreelanceApp: React.FC = () => {
 
   const handleCompleteJob = () => {
     if (selectedJob) {
-      // Remove the job from the list
-      const updatedJobs = jobs.filter(job => job.id !== selectedJob.id);
-      setJobs(updatedJobs);
-      
-      // Reset selected job
-      setSelectedJob(null);
-      
-      toast(`${selectedJob.clientName}'s project has been completed`, {
-        description: "The job has been removed from your list"
-      });
+      setCompletedJobId(selectedJob.id);
+      setIsCompleteDialogOpen(true);
+    }
+  };
+
+  const confirmCompleteJob = (generateInvoice: boolean) => {
+    // Remove the job from the list
+    const updatedJobs = jobs.filter(job => job.id !== completedJobId);
+    setJobs(updatedJobs);
+    
+    // Get the job name for toast
+    const jobName = jobs.find(job => job.id === completedJobId)?.clientName || '';
+    
+    // Reset selected job
+    setSelectedJob(null);
+    setIsCompleteDialogOpen(false);
+    
+    toast(`${jobName}'s project has been completed`, {
+      description: "The job has been removed from your list"
+    });
+    
+    // If user wants to generate invoice, navigate to invoice page
+    if (generateInvoice) {
+      navigate('/invoice');
     }
   };
 
@@ -305,6 +325,41 @@ const FreelanceApp: React.FC = () => {
           )}
         </div>
       </main>
+
+      {/* Calendar button (positioned at bottom right) */}
+      <button
+        className="fixed right-6 bottom-6 w-14 h-14 rounded-full bg-primary/80 hover:bg-primary text-white shadow-lg flex items-center justify-center transition-colors z-10"
+        onClick={() => navigate('/calendar')}
+        aria-label="View Calendar"
+      >
+        <CalendarIcon size={24} />
+      </button>
+
+      {/* Completion Dialog */}
+      <AlertDialog open={isCompleteDialogOpen} onOpenChange={setIsCompleteDialogOpen}>
+        <AlertDialogContent className="bg-gray-800 border-gray-700 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Job Complete</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400">
+              Continue to invoice generation?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              className="bg-gray-700 text-white hover:bg-gray-600"
+              onClick={() => confirmCompleteJob(false)}
+            >
+              No
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-green-600 hover:bg-green-500"
+              onClick={() => confirmCompleteJob(true)}
+            >
+              Yes
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
